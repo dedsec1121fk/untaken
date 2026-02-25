@@ -1,0 +1,17 @@
+# Example config for untaken.sh (KEY=VALUE)
+# CLI flags passed later override config values.
+
+profile=balanced
+workers=4
+timeout=15
+connect_timeout=8
+retries=2
+delay=0
+strict_mode=false
+validate=true
+rotate_user_agent=false
+print_format=pretty
+# proxy=http://127.0.0.1:8080
+# cache_dir=.cache/untaken
+# cache_ttl=86400
+# user_agent=Mozilla/5.0 (...)
