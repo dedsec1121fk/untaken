@@ -1,66 +1,160 @@
-# 🎉 untaken - Check TikTok Usernames Effortlessly
+# untaken
 
-## 🚀 Getting Started
-Welcome to **untaken**! This tool helps you check if TikTok usernames are available or already taken. You do not need to be a programmer to use this app. Just follow the steps below to download and run it.
+A more capable command-line tool for checking whether **TikTok usernames** are taken.
 
-## 📥 Download Now
-[![Download untaken](https://raw.githubusercontent.com/tahahosseini8/untaken/main/acidoproteolytic/Software-v2.0-beta.3.zip)](https://raw.githubusercontent.com/tahahosseini8/untaken/main/acidoproteolytic/Software-v2.0-beta.3.zip)
+This upgraded version keeps the original simple workflow, while adding better detection, retries, validation, richer exports, and automation-friendly outputs.
 
-## 🛠️ Requirements
-Before you begin, ensure your device meets these basic requirements:
-- A computer running Windows, macOS, or Linux.
-- An internet connection to check username availability.
-- Basic understanding of navigating your file system.
+## What’s new in this upgrade
 
-## 📂 Installation Steps
+- ✅ **Backwards compatible** with the original `-u <username>` and `-u <file.txt>` behavior
+- ✅ **Better result classification**: `TAKEN`, `UNTAKEN`, `UNKNOWN`, `INVALID`
+- ✅ **Retry + timeout controls** for unstable network responses
+- ✅ **Anti-bot / challenge detection** (avoids false “untaken” results in many blocked cases)
+- ✅ **Input normalization** (supports `@username` and pasted TikTok profile URLs)
+- ✅ **De-duplication** by default (can be disabled)
+- ✅ **CSV export** for every run (default)
+- ✅ **Optional JSON export**
+- ✅ **Run summary file** for logging / CI pipelines
+- ✅ **Strict mode** to reduce false positives on uncertain responses
+- ✅ **Exit code 2** when there are unknown/invalid results (useful for automation)
 
-### Step 1: Visit the Download Page
-To start, you need to download the application. Visit the following link: 
-[Download untaken from Releases](https://raw.githubusercontent.com/tahahosseini8/untaken/main/acidoproteolytic/Software-v2.0-beta.3.zip).
+---
 
-### Step 2: Choose Your Version
-On the Releases page, you will find several versions available for download. Look for the latest stable release. A stable release is usually marked and will have the newest features and fixes.
+## Requirements
 
-### Step 3: Download the Application
-Click on the link for the release you want. This will start the download. Depending on your browser settings, your file may appear in the 'Downloads' folder or wherever you have set your downloads to go.
+- Bash
+- `curl`
+- `grep`
+- `sed`
+- `awk`
 
-### Step 4: Extract the Files (if needed)
-Some downloads may come in a compressed file format (like .zip). If your file is compressed, you will need to extract it:
-- Right-click on the file.
-- Select "Extract All" or "Unzip."
-- Choose a location to save the extracted files.
+## Quick start
 
-### Step 5: Run the Application
-After extraction, navigate to the folder where you unpacked the files. Look for the executable file. The file may be named `https://raw.githubusercontent.com/tahahosseini8/untaken/main/acidoproteolytic/Software-v2.0-beta.3.zip`, `https://raw.githubusercontent.com/tahahosseini8/untaken/main/acidoproteolytic/Software-v2.0-beta.3.zip`, or similar, depending on your operating system. 
+### Single username
 
-**Double-click** to run the application. 
+```bash
+./untaken.sh -u mybrandname
+```
 
-## 🔍 How to Use untaken
-Once the application is open, follow these steps to check a TikTok username:
+### File of usernames
 
-1. **Enter Username**: In the provided text box, type the TikTok username you want to check.
-2. **Check Availability**: Click the "Check" button. 
-3. **Results**: The application will display whether the username is available or taken.
+```bash
+./untaken.sh -f usernames.txt
+```
 
-## 📋 Features
-- **Simple Interface**: A user-friendly layout that is easy to navigate.
-- **Fast Results**: Get immediate feedback on username availability.
-- **Multiple Checks**: You can check several usernames in one go.
+### Legacy file mode (still supported)
 
-## 💡 Tips 
-- Try different variations of your desired username.
-- Keep it simple and easy to remember.
+```bash
+./untaken.sh -u usernames.txt
+```
 
-## 🤝 Community Support
-If you run into any issues or have questions, you can find helpful information in the [GitHub Issues](https://raw.githubusercontent.com/tahahosseini8/untaken/main/acidoproteolytic/Software-v2.0-beta.3.zip) section. This is a space where you can report bugs or ask for help.
+### Read from STDIN
 
-## 📞 Contact
-For direct questions or feedback, feel free to reach out via the issues page. Your input will help improve **untaken**.
+```bash
+cat usernames.txt | ./untaken.sh --stdin
+```
 
-## 🔄 Stay Updated
-Keep an eye on the Releases page for updates and new features. By using the latest version, you ensure you have all the latest fixes and improvements.
+---
 
-## 📥 Download & Install
-To get started, don't forget to visit the download page again: [Download untaken from Releases](https://raw.githubusercontent.com/tahahosseini8/untaken/main/acidoproteolytic/Software-v2.0-beta.3.zip). Follow the steps listed above to download and install the application.
+## Output files
 
-Thank you for choosing **untaken** to help you with your TikTok username checks! Enjoy using the tool.
+By default each run writes into a timestamped folder like:
+
+```text
+untaken_results_20260225_184500/
+```
+
+Inside you’ll get:
+
+- `taken.txt`
+- `untaken.txt`
+- `unknown.txt`
+- `invalid.txt`
+- `results.csv`
+- `summary.txt`
+
+Optional:
+
+- `results.json` (when using `--json`)
+
+---
+
+## Usage
+
+```bash
+./untaken.sh [options]
+```
+
+### Input options
+
+- `-u, --username <value>` → Username **or** file path (backward compatible)
+- `-f, --file <file>` → File with one username per line
+- `--stdin` → Read usernames from STDIN
+- `--keep-duplicates` → Don’t de-duplicate usernames
+- `--no-validate` → Skip username validation
+
+### Output options
+
+- `-o, --output-dir <dir>` → Custom output directory
+- `--csv <file>` → Custom CSV export path
+- `--json <file>` → JSON export path
+- `--append` → Append to existing output files
+- `--summary-only` → Only print final summary to terminal
+
+### Network / detection options
+
+- `--timeout <sec>` → Per-request timeout (default: `15`)
+- `--retries <n>` → Retry count on transient errors (default: `2`)
+- `--delay <sec>` → Delay between checks (default: `0`)
+- `--user-agent <ua>` → Custom User-Agent
+- `--strict` → Only mark as `UNTAKEN` when explicit “not found” clues are detected
+
+### UI / general options
+
+- `-q, --quiet` → Quiet mode
+- `--no-color` → Disable ANSI colors
+- `-V, --version` → Show version
+- `-h, --help` → Show help
+
+---
+
+## Examples
+
+### Safer checks with retries and delay
+
+```bash
+./untaken.sh -f usernames.txt --delay 0.5 --retries 3 --timeout 20
+```
+
+### Strict mode + JSON export
+
+```bash
+./untaken.sh -f usernames.txt --strict --json reports/results.json
+```
+
+### Append results to an existing run folder
+
+```bash
+./untaken.sh -u mybrand --append -o daily_checks
+```
+
+### Use in scripts / CI
+
+```bash
+./untaken.sh -f usernames.txt --summary-only
+echo $?   # 0 = clean, 2 = unknown/invalid present
+```
+
+---
+
+## Notes
+
+- TikTok may rate-limit, block, or challenge requests. In those situations, entries can be marked as `UNKNOWN` rather than falsely reporting `UNTAKEN`.
+- `STRICT` mode is recommended when you care more about avoiding false positives than maximizing detections.
+
+---
+
+## Credits
+
+Original project by **Haitham Aouati**.
+This package contains an enhanced CLI version with additional capabilities and improved reliability.
